@@ -19,20 +19,17 @@ import { fetchJson, FetchError } from '../_lib/fetcher';
 // ─── 上游数据格式 ────────────────────────────────────────────────────
 // 东方财富行情接口（ulist.np/get）返回 JSON：
 // {
-//   "data": [
-//     {
-//       "f12": "1.000001",    // 指数代码
-//       "f14": "上证指数",     // 指数名称
-//       "f2": 3210.55,        // 最新价
-//       "f3": 0.35,           // 涨跌幅 (%)
-//       "f4": 11.23           // 涨跌额
-//     },
-//     ...
-//   ]
+//   "data": {
+//     "total": 3,
+//     "diff": [
+//       {"f12":"000001","f14":"上证指数","f2":3990.24,"f3":-1.26,"f4":-51.0},
+//       ...
+//     ]
+//   }
 // }
 
 interface RawIndexItem {
-  f12: string;   // 指数代码
+  f12: string;   // 指数代码（无市场前缀，如 "000001"）
   f14: string;   // 指数名称
   f2: number;    // 最新价
   f3: number;    // 涨跌幅 (%)
@@ -40,7 +37,10 @@ interface RawIndexItem {
 }
 
 interface RawMarketResponse {
-  data: RawIndexItem[];
+  data: {
+    total: number;
+    diff: RawIndexItem[];
+  };
 }
 
 // ─── 输出格式 ────────────────────────────────────────────────────────
@@ -83,6 +83,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    // 构建代码映射表：上游返回的 f12 不含市场前缀（如 "000001"），
+    // 需要用请求参数中的完整代码（如 "1.000001"）做映射
+    const codeMap = new Map<string, string>();
+    for (const c of codes) {
+      const stripped = c.split('.').pop() || c;
+      codeMap.set(stripped, c);
+    }
+
     // 东方财富批量行情查询
     const secids = codes.join(',');
     const url =
@@ -91,12 +99,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const raw = await fetchJson<RawMarketResponse>(url);
 
-    // 上游 data 存在但可能为空
-    const rawList = raw?.data ?? [];
+    // 上游数据在 data.diff 中，data 本身是对象
+    const rawList = raw?.data?.diff ?? [];
 
     const data: IndexItem[] = rawList.map((item: RawIndexItem) => ({
-      code: item.f12 || '',
-      name: item.f14 || INDEX_NAMES[item.f12] || '未知指数',
+      code: codeMap.get(item.f12) || item.f12,
+      name: item.f14 || INDEX_NAMES[codeMap.get(item.f12) || item.f12] || '未知指数',
       price: item.f2 ?? 0,
       change: item.f3 ?? 0,
       changeAmount: item.f4 ?? 0,
