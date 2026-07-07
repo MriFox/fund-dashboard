@@ -19,9 +19,9 @@ const emit = defineEmits<{
 
 <template>
   <div
-    class="flex items-center justify-between px-4 py-3.5 bg-white rounded-xl
-           border border-gray-100 shadow-sm cursor-pointer
-           hover:border-gray-200 active:bg-gray-50 transition-colors"
+    class="flex items-center justify-between px-4 py-3.5 bg-[var(--bg-card)] rounded-[var(--radius-card)]
+           shadow-[var(--shadow-card)] cursor-pointer
+           active:bg-black/5 transition-all duration-200 ease-out"
     role="button"
     tabindex="0"
     :aria-label="`${fund.holding.name} 基金卡片`"
@@ -31,24 +31,24 @@ const emit = defineEmits<{
   >
     <!-- 左侧：名称 + 代码 -->
     <div class="flex-1 min-w-0 mr-3">
-      <p class="text-sm font-semibold text-gray-900 truncate">
+      <p class="text-[15px] font-semibold text-[var(--text-primary)] truncate">
         {{ fund.holding.name }}
       </p>
-      <p class="text-xs text-gray-400 mt-0.5">
+      <p class="text-[13px] text-[var(--text-secondary)] mt-0.5">
         {{ fund.holding.code }}
       </p>
     </div>
 
     <!-- 右侧：估值 + 涨跌 -->
     <div class="flex flex-col items-end shrink-0">
-      <p class="text-sm font-semibold text-gray-900 tabular-nums">
+      <p class="text-[15px] font-semibold text-[var(--text-primary)] tabular-nums">
         {{ fund.valuation ? formatCurrency(fund.valuation.valuation) : formatCurrency(fund.holding.costNav) }}
       </p>
       <ProfitBadge
         v-if="fund.valuation"
         :change="fund.valuation.change"
       />
-      <span v-else class="text-xs text-gray-400">--</span>
+      <span v-else class="text-[13px] text-[var(--text-secondary)]">--</span>
     </div>
   </div>
 </template>

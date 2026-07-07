@@ -15,7 +15,7 @@ const props = withDefaults(defineProps<{
 
 const variantClasses: Record<SkeletonVariant, string> = {
   card: 'rounded-xl h-28 w-full',
-  text: 'rounded h-4 w-full',
+  text: 'rounded-lg h-4 w-full',
   circle: 'rounded-full h-10 w-10'
 }
 </script>
@@ -24,7 +24,8 @@ const variantClasses: Record<SkeletonVariant, string> = {
   <div
     v-for="i in repeat"
     :key="i"
-    class="animate-pulse bg-gray-200"
+    class="animate-pulse"
+    style="background-color: #e5e5ea;"
     :class="[variantClasses[variant]]"
     :style="{
       width: variant === 'circle' ? height : width,

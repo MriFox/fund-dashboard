@@ -20,7 +20,7 @@ const displayText = computed(() => formatChange(props.change))
 
 <template>
   <span
-    class="inline-block px-2 py-0.5 rounded text-xs font-semibold leading-normal"
+    class="inline-block px-2 py-0.5 rounded-[var(--radius-button)] text-[13px] font-bold leading-normal tabular-nums"
     :class="badgeClass"
     role="status"
     :aria-label="`涨跌幅 ${displayText}`"
@@ -38,12 +38,9 @@ const displayText = computed(() => formatChange(props.change))
   color: var(--color-down, #22c55e);
   background-color: color-mix(in srgb, var(--color-down, #22c55e) 12%, transparent);
 }
-.badge-zero {
-  color: #9ca3af;
-  background-color: #f3f4f6;
-}
+.badge-zero,
 .badge-none {
   color: #9ca3af;
-  background-color: #f3f4f6;
+  background-color: #e5e5ea;
 }
 </style>

@@ -4,7 +4,7 @@ import NavBar from './NavBar.vue'
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 pb-14">
+  <div class="min-h-screen" style="background-color: var(--bg-primary); padding-bottom: 56px;">
     <!-- 离线提示条 -->
     <NetworkStatus />
 

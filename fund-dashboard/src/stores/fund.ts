@@ -64,14 +64,20 @@ export const useFundStore = defineStore('fund', {
 
     /** 总盈亏金额 */
     totalProfit(): number {
-      // 待 FD-005 联调后实现：totalAssets - totalCost
-      return 0
+      return this.totalAssets - this.totalCost
     },
 
     /** 今日预估盈亏 */
     todayProfit(): number {
-      // 待 FD-005 联调后实现：Σ(涨跌额 * 持有份额)
-      return 0
+      return this.holdings.reduce((sum, h) => {
+        const v = this.valuations[h.code]
+        return sum + (v ? v.changeAmount * h.holdShares : 0)
+      }, 0)
+    },
+
+    /** 持仓基金 code 集合（快速查重） */
+    holdingCodes(state): Set<string> {
+      return new Set(state.holdings.map(h => h.code))
     }
   },
 
