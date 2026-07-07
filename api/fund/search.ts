@@ -20,12 +20,12 @@ import { fetchText, cleanJsonpResponse, FetchError } from '../_lib/fetcher';
 import { LRUCache } from '../_lib/cache';
 
 // ─── 基金列表类型 ────────────────────────────────────────────────────
-// 上游数据格式（JS 变量赋值）：
-//   var r = [["110022","易方达消费行业股票","股票型","110022"],
-//            ["000001","华夏成长混合","混合型","000001"],...];
+// 上游数据格式（JS 变量赋值）：共 5 个元素
+//   var r = [["110022","YFDXFHYYPGP","易方达消费行业股票","股票型","YIFANGDAXIAOFEIHANGYEGUPIAO"],
+//            ["000001","HXCZHH","华夏成长混合","混合型-灵活","HUAXIACHENGZHANGHUNHE"],...];
+//             ^code    ^pinyin   ^name            ^type              ^pinyinFull
 
-type RawFundItem = [string, string, string, string];
-//                   ^code   ^name   ^type    ^pinyin
+type RawFundItem = [string, string, string, string, string];
 
 interface FundItem {
   code: string;
@@ -54,7 +54,7 @@ async function loadFullFundList(): Promise<FundItem[]> {
   const cleaned = cleanJsonpResponse(rawText);
   const rawList = JSON.parse(cleaned) as RawFundItem[];
 
-  const fundList: FundItem[] = rawList.map(([code, name, type]) => ({
+  const fundList: FundItem[] = rawList.map(([code, _pinyin, name, type]) => ({
     code,
     name,
     type,
