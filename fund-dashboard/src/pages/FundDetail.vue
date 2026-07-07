@@ -7,7 +7,7 @@ import ProfitBadge from '@/components/ProfitBadge.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import SkeletonLoader from '@/components/SkeletonLoader.vue'
 import ErrorState from '@/components/ErrorState.vue'
-import FundChart from '@/components/FundChart.vue'
+import { fetchHistory } from '@/services/fundService'
 
 const route = useRoute()
 const router = useRouter()
@@ -95,12 +95,59 @@ function confirmDelete() {
 
 /* ───── 加载 ───── */
 
+const historyItems = ref<Array<{ date: string; nav: number; change: number }>>([])
+const historyLoaded = ref(false)
+
+/** 计算指定间隔的收益率（交易日数） */
+function periodReturn(days: number): number | null {
+  if (historyItems.value.length < days + 1) return null
+  const latest = historyItems.value[historyItems.value.length - 1]?.nav
+  const past = historyItems.value[historyItems.value.length - 1 - days]?.nav
+  if (!latest || !past) return null
+  return ((latest - past) / past) * 100
+}
+
+/** 近 1 月收益率 */
+const return1M = computed(() => periodReturn(22))
+/** 近 3 月收益率 */
+const return3M = computed(() => periodReturn(66))
+/** 近 6 月收益率 */
+const return6M = computed(() => periodReturn(132))
+/** 近 1 年收益率 */
+const return1Y = computed(() => {
+  if (historyItems.value.length < 2) return null
+  const latest = historyItems.value[historyItems.value.length - 1]?.nav
+  const past = historyItems.value[0]?.nav
+  if (!latest || !past) return null
+  return ((latest - past) / past) * 100
+})
+
+/** 最大回撤 */
+interface Drawdown { value: number; date: string }
+const maxDrawdown = computed<Drawdown | null>(() => {
+  if (historyItems.value.length < 2) return null
+  let peak = historyItems.value[0]
+  let maxDd: Drawdown | null = null
+  for (const item of historyItems.value) {
+    if (item.nav > peak.nav) peak = item
+    const dd = (item.nav - peak.nav) / peak.nav * 100
+    if (!maxDd || dd < maxDd.value) {
+      maxDd = { value: dd, date: item.date }
+    }
+  }
+  return maxDd
+})
+
 async function loadData() {
   loading.value = true
   fundStore.loadHoldings()
   try {
     if (fundStore.holdings.length > 0) {
       await fundStore.fetchValuations()
+      // 拉取历史净值（用于三个信息卡片）
+      const history = await fetchHistory(fundCode.value, 1, 365)
+      historyItems.value = [...history.items].reverse()
+      historyLoaded.value = true
     }
   } catch {
     // 静默处理，显示已有数据
@@ -214,8 +261,47 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- 净值走势图 -->
-        <FundChart :code="fundCode" />
+        <!-- 三个信息卡片 -->
+        <template v-if="historyLoaded">
+          <!-- 历史业绩 -->
+          <div class="rounded-[var(--radius-card)] bg-[var(--bg-card)] shadow-[var(--shadow-card)] p-4 space-y-3 transition-all duration-200 ease-out">
+            <h3 class="text-[13px] text-[var(--text-secondary)] font-medium">历史业绩</h3>
+            <div class="space-y-2">
+              <div v-for="row in [
+                { label: '近 1 月', value: return1M },
+                { label: '近 3 月', value: return3M },
+                { label: '近 6 月', value: return6M },
+                { label: '近 1 年', value: return1Y },
+                { label: '成立以来', value: null }
+              ]" :key="row.label" class="flex justify-between items-center">
+                <span class="text-[15px] text-[var(--text-primary)]">{{ row.label }}</span>
+                <span
+                  v-if="row.value != null"
+                  class="text-[15px] font-semibold tabular-nums"
+                  :class="row.value >= 0 ? 'text-[var(--color-up)]' : 'text-[var(--color-down)]'"
+                >
+                  {{ row.value >= 0 ? '+' : '' }}{{ row.value.toFixed(2) }}%
+                </span>
+                <span v-else class="text-[13px] text-[var(--text-secondary)]">--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 最大回撤 -->
+          <div class="rounded-[var(--radius-card)] bg-[var(--bg-card)] shadow-[var(--shadow-card)] p-4 space-y-1 transition-all duration-200 ease-out">
+            <h3 class="text-[13px] text-[var(--text-secondary)] font-medium">最大回撤</h3>
+            <p v-if="maxDrawdown" class="text-[17px] font-bold text-[var(--color-down)] tabular-nums">
+              {{ maxDrawdown.value.toFixed(2) }}%<span class="text-[13px] font-normal text-[var(--text-secondary)] ml-2">{{ maxDrawdown.date }}</span>
+            </p>
+            <p v-else class="text-[15px] text-[var(--text-secondary)]">暂无数据</p>
+          </div>
+
+          <!-- 基金经理 -->
+          <div class="rounded-[var(--radius-card)] bg-[var(--bg-card)] shadow-[var(--shadow-card)] p-4 space-y-1 transition-all duration-200 ease-out">
+            <h3 class="text-[13px] text-[var(--text-secondary)] font-medium">基金经理</h3>
+            <p class="text-[15px] text-[var(--text-secondary)]">暂无数据</p>
+          </div>
+        </template>
 
         <!-- HoldingForm：编辑表单 -->
         <div
