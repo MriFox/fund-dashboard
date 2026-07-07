@@ -1,0 +1,8 @@
+{
+  "buildCommand": "cd fund-dashboard && npm install && npm run build",
+  "outputDirectory": "fund-dashboard/dist",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/((?!api/).*)", "destination": "/fund-dashboard/dist/$1" }
+  ]
+}
