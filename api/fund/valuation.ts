@@ -55,7 +55,7 @@ async function fetchSingleValuation(code: string): Promise<ValuationItem | null>
       nav: parseFloat(raw.dwjz),
       valuation: parseFloat(raw.gsz),
       change: parseFloat(raw.gszzl),
-      changeAmount: parseFloat(raw.gzds),
+      changeAmount: parseFloat(raw.gzds) || 0,
       updateTime: raw.gztime,
     };
   } catch (err: unknown) {
