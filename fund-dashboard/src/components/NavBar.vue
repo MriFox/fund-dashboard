@@ -6,6 +6,7 @@ const route = useRoute()
 
 const tabs = [
   { label: '持仓', path: '/', icon: 'i-carbon-wallet' },
+  { label: '对比', path: '/compare', icon: 'i-carbon-chart-line' },
   { label: '添加', path: '/search', icon: 'i-carbon-search' }
 ] as const
 

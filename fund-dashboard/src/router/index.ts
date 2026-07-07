@@ -18,6 +18,12 @@ const routes = [
     name: 'fund-detail',
     component: () => import('@/pages/FundDetail.vue'),
     meta: { title: '基金详情' }
+  },
+  {
+    path: '/compare',
+    name: 'compare',
+    component: () => import('@/pages/FundCompare.vue'),
+    meta: { title: '基金对比' }
   }
 ]
 
