@@ -1,0 +1,26 @@
+{
+  "name": "fund-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "pinia": "^2.1.7",
+    "vue": "^3.4.21",
+    "vue-router": "^4.3.0"
+  },
+  "devDependencies": {
+    "@iconify/json": "^2.2.210",
+    "@unocss/preset-icons": "^0.58.5",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "typescript": "~5.4.0",
+    "unocss": "^0.58.5",
+    "vite": "^5.2.0",
+    "vite-plugin-pwa": "^0.19.7",
+    "vue-tsc": "^2.0.6"
+  }
+}
