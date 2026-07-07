@@ -11,6 +11,8 @@ import FundCard from '@/components/FundCard.vue'
 import SkeletonLoader from '@/components/SkeletonLoader.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import ErrorState from '@/components/ErrorState.vue'
+import MarketIndexCard from '@/components/MarketIndexCard.vue'
+import AssetAllocation from '@/components/AssetAllocation.vue'
 
 const router = useRouter()
 const fundStore = useFundStore()
@@ -128,6 +130,9 @@ onMounted(() => {
       <SkeletonLoader variant="card" v-for="i in 3" :key="i" />
     </div>
 
+    <!-- MarketIndexCard：大盘指数 -->
+    <MarketIndexCard v-if="hasHoldings && !isFirstLoad" />
+
     <!-- 有持仓 → 展示汇总 + 列表 -->
     <template v-if="hasHoldings && !isFirstLoad">
       <!-- 汇总卡片 -->
@@ -169,6 +174,9 @@ onMounted(() => {
           @click="goToDetail(item.code)"
         />
       </div>
+
+      <!-- AssetAllocation：资产配置饼图 -->
+      <AssetAllocation />
     </template>
 
     <!-- 错误（无缓存） -->

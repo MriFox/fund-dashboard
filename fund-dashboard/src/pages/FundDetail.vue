@@ -7,6 +7,7 @@ import ProfitBadge from '@/components/ProfitBadge.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import SkeletonLoader from '@/components/SkeletonLoader.vue'
 import ErrorState from '@/components/ErrorState.vue'
+import FundChart from '@/components/FundChart.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -212,6 +213,9 @@ onMounted(() => {
             </span>
           </div>
         </div>
+
+        <!-- 净值走势图 -->
+        <FundChart :code="fundCode" />
 
         <!-- HoldingForm：编辑表单 -->
         <div
